@@ -1,0 +1,140 @@
+gui_upgrade:
+  title: Item Upgrade
+  size: 6
+  items:
+    default_upgrade_item: 11
+    upgraded_item:
+      slot: 15
+      max_items:
+        material: BARRIER
+        flags:
+          - HIDE_ENCHANTS
+        display: '&cYou have reached the maximum upgrade level'
+    requirement_items:
+      none_items:
+        material: BARRIER
+        flags:
+          - HIDE_ENCHANTS
+        display: '&cEmpty Ingredients'
+      slots:
+        - 29
+        - 30
+        - 31
+        - 32
+        - 33
+        - 38
+        - 39
+        - 40
+        - 41
+        - 42
+    decorates_1:
+      material: BLACK_STAINED_GLASS_PANE
+      slots:
+        - 0
+        - 1
+        - 7
+        - 8
+        - 9
+        - 17
+        - 36
+        - 44
+        - 45
+        - 46
+        - 52
+        - 53
+      display: '&a'
+    decorates_2:
+      material: GRAY_STAINED_GLASS_PANE
+      slots:
+        - 2
+        - 3
+        - 5
+        - 6
+        - 10
+        - 12
+        - 14
+        - 16
+        - 18
+        - 19
+        - 20
+        - 21
+        - 22
+        - 23
+        - 24
+        - 25
+        - 26
+        - 27
+        - 28
+        - 34
+        - 35
+        - 37
+        - 43
+        - 47
+        - 48
+        - 49
+        - 50
+        - 51
+      display: '&a'
+    confirm:
+      material: EMERALD
+      slot: 13
+      enchants:
+        - UNBREAKING;1
+      flags:
+        - HIDE_ENCHANTS
+      display: '&aConfirm Upgrade'
+      lore:
+        - '&7Click to upgrade item'
+      action: confirm_upgrade
+    force_upgrade:
+      material: NETHER_STAR
+      slot: 4
+      enchants:
+        - UNBREAKING;1
+      flags:
+        - HIDE_ENCHANTS
+      display: '&aForce Confirm'
+      lore:
+        - '&7Click to upgrade item'
+      action: force_upgrade
+      force_upgrade_item:
+        - MMOITEMS;MATERIAL;FORCE_UPGRADE;1
+preview_item:
+  preview_items:
+    title: Item Upgrade Preview
+    size: 6
+  preview_ingredients:
+    title: Preview Ingredients
+    size: 6
+page_item:
+  previous_item:
+    material: ARROW
+    display: "&aPrevious Page"
+    lore:
+      - "&7Click to go previous page"
+    enchants:
+      - UNBREAKING;1
+    flags:
+      - HIDE_ENCHANTS
+  next_item:
+    material: ARROW
+    display: "&aNext Page"
+    lore:
+      - "&7Click to go next page"
+    enchants:
+      - UNBREAKING;1
+    flags:
+      - HIDE_ENCHANTS
+item_upgrade:
+  TOOL;AXE:
+    item_requirements:
+      ingredients_1:
+        - MMOITEMS;MATERIAL;GO_SOI;32
+      ingredients_2:
+        - MMOITEMS;MATERIAL;VAN_GO_SOI;1
+      ingredients_3:
+        - MMOITEMS;MATERIAL;VAN_GO_SOI;2
+      ingredients_4:
+        - MMOITEMS;MATERIAL;VAN_GO_SOI;5
+      ingredients_5:
+        - MMOITEMS;MATERIAL;VAN_GO_SOI;10

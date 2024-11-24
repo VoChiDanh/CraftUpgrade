@@ -1,0 +1,14 @@
+admin:
+  reload_files: "<aqua>Reloaded Files!"
+
+user:
+  upgrade_item:
+    not_enough_item: "<red>You don't have enough requirement items!"
+    upgrade_success: "<green>Upgrade successfully"
+    reach_max_upgrade: "<green>You have reached the maximum upgrade level"
+    do_not_have_item: "<red>You don't have item in hand to upgrade"
+    can_not_upgrade_item: "<red>This item can't be upgrade"
+  split_item:
+    split_success: "<green>Split item successfully"
+    do_not_have_item: "<red>You don't have item in hand to split"
+    can_not_split_item: "<red>This item can't be split"

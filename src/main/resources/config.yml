@@ -1,0 +1,5 @@
+settings:
+  debug: false
+  prefix: "<white>[ <aqua>CraftUpgrade</aqua> ]"
+# Config version
+version: 1

@@ -1,0 +1,11 @@
+name: CraftUpgrade
+version: '1.0'
+main: net.danh.craftUpgrade.CraftUpgrade
+api-version: '1.13'
+authors: [ VoChiDanh ]
+depend:
+  - MMOItems
+  - MythicLib
+commands:
+  CraftUpgrade:
+    description: Command
