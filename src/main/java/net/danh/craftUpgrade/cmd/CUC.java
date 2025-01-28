@@ -1,6 +1,7 @@
 package net.danh.craftUpgrade.cmd;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
+import net.danh.craftUpgrade.gui.InvClick;
 import net.danh.craftUpgrade.gui.split_gui.ItemSplit;
 import net.danh.craftUpgrade.gui.upgrade_gui.ItemUpgrade;
 import net.danh.craftUpgrade.gui.upgrade_gui.PreviewItem;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class CUC extends CMDBase {
     public CUC() {
@@ -26,6 +28,16 @@ public class CUC extends CMDBase {
 
     @Override
     public void execute(@NotNull CommandSender c, String[] args) {
+
+        if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("list")) {
+                if (c instanceof Player p) {
+                    if (Objects.requireNonNull(Files.getItemUpgrade().getConfigurationSection("item_upgrade")).getKeys(false).contains(args[1])) {
+                        InvClick.getIngredientsItems(p, args[1], 1);
+                    }
+                }
+            }
+        }
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("list")) {
                 if (c instanceof Player p) {
@@ -100,6 +112,12 @@ public class CUC extends CMDBase {
             commands.add("check_split");
             commands.add("list");
             StringUtil.copyPartialMatches(args[0], commands, completions);
+        }
+        if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("list")) {
+                commands.addAll(Objects.requireNonNull(Files.getItemUpgrade().getConfigurationSection("item_upgrade")).getKeys(false));
+            }
+            StringUtil.copyPartialMatches(args[1], commands, completions);
         }
         Collections.sort(completions);
         return completions;

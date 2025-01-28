@@ -127,6 +127,13 @@ page_item:
       - HIDE_ENCHANTS
 item_upgrade:
   TOOL;AXE:
+    cost:
+      placeholder: "<level> * <money>"
+      papi_parse: '%vault_eco_balance_fixed%'
+      papi_format: '%vault_eco_balance_commas%'
+      price: 1000
+      command:
+        - "eco take %player_name% <cost>"
     item_requirements:
       ingredients_1:
         - MMOITEMS;MATERIAL;GO_SOI;32

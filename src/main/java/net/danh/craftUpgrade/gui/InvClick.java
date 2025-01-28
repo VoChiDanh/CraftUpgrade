@@ -11,6 +11,8 @@ import net.danh.craftUpgrade.gui.upgrade_gui.PreviewItem;
 import net.danh.craftUpgrade.resources.Chat;
 import net.danh.craftUpgrade.resources.Files;
 import net.danh.craftUpgrade.resources.Number;
+import net.danh.craftUpgrade.utils.Calculator;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -174,11 +176,27 @@ public class InvClick implements Listener {
                                             if (nextItem != null) {
                                                 List<String> requirementsItem = PlaceholderAPI.setPlaceholders(p,
                                                         config.getStringList("item_upgrade." + type + ";" + final_id + ".item_requirements.ingredients_" + level));
-                                                if (ItemUpgrade.getMeetItemsRequirement(p, requirementsItem)) {
-                                                    p.closeInventory();
-                                                    p.getInventory().setItemInMainHand(nextItem);
-                                                    Chat.sendMessage(p,
-                                                            Files.getMessage().getString("user.upgrade_item.upgrade_success"));
+                                                String cost_papi = config.getString("item_upgrade." + type + ";" + final_id + ".cost.placeholder");
+                                                String papi_parse = config.getString("item_upgrade." + type + ";" + final_id + ".cost.papi_parse");
+                                                String papi_format = config.getString("item_upgrade." + type + ";" + final_id + ".cost.papi_format");
+                                                int price = config.getInt("item_upgrade." + type + ";" + final_id + ".cost.price");
+                                                List<String> command = config.getStringList("item_upgrade." + type + ";" + final_id + ".cost.command");
+                                                if (cost_papi != null && ItemUpgrade.cost(p, cost_papi, papi_parse, papi_format, level, price)) {
+                                                    if (ItemUpgrade.getMeetItemsRequirement(p, requirementsItem)) {
+                                                        String papi = PlaceholderAPI.setPlaceholders(p, cost_papi.replace("<money>", String.valueOf(price))
+                                                                .replace("<level>", String.valueOf(level)));
+                                                        int cost = (int) Double.parseDouble(Calculator.calculator(papi, 0));
+                                                        for (String cmd : command) {
+                                                            Bukkit.getServer().dispatchCommand(
+                                                                    Bukkit.getServer().getConsoleSender(),
+                                                                    PlaceholderAPI.setPlaceholders(p, cmd.replace("<cost>", String.valueOf(cost))
+                                                                            .replace("<level>", String.valueOf(level))));
+                                                        }
+                                                        p.closeInventory();
+                                                        p.getInventory().setItemInMainHand(nextItem);
+                                                        Chat.sendMessage(p,
+                                                                Files.getMessage().getString("user.upgrade_item.upgrade_success"));
+                                                    }
                                                 } else {
                                                     Chat.sendMessage(p,
                                                             Files.getMessage().getString("user.upgrade_item.not_enough_item"));

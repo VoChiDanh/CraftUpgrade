@@ -8,6 +8,7 @@ user:
     reach_max_upgrade: "<green>You have reached the maximum upgrade level"
     do_not_have_item: "<red>You don't have item in hand to upgrade"
     can_not_upgrade_item: "<red>This item can't be upgrade"
+    not_enough_cost: "<red>You don't have enough <cost>$, you only have <current>$"
   split_item:
     split_success: "<green>Split item successfully"
     do_not_have_item: "<red>You don't have item in hand to split"

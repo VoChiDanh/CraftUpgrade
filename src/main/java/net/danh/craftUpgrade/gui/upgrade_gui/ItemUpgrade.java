@@ -1,10 +1,12 @@
 package net.danh.craftUpgrade.gui.upgrade_gui;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.Indyuce.mmoitems.MMOItems;
 import net.danh.craftUpgrade.resources.Chat;
 import net.danh.craftUpgrade.resources.Files;
 import net.danh.craftUpgrade.resources.Number;
+import net.danh.craftUpgrade.utils.Calculator;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -19,6 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -290,6 +293,21 @@ public class ItemUpgrade {
         }
         inv.setContents(items);
         player.updateInventory();
+    }
+
+    public static boolean cost(Player p, @NotNull String cost_papi, String papi_parse, String papi_format, int level, int cost_money) {
+        String papi = PlaceholderAPI.setPlaceholders(p, cost_papi.replace("<money>", String.valueOf(cost_money))
+                .replace("<level>", String.valueOf(level)));
+        int cost = (int) Double.parseDouble(Calculator.calculator(papi, 0));
+        if (cost <= Double.parseDouble(PlaceholderAPI.setPlaceholders(p, papi_parse))) {
+            return true;
+        } else {
+            DecimalFormat currencyFormat = new DecimalFormat("###,###.##");
+            Chat.sendMessage(p, Objects.requireNonNull(Files.getMessage().getString("user.upgrade_item.not_enough_cost"))
+                    .replace("<cost>", currencyFormat.format(cost))
+                    .replace("<current>", PlaceholderAPI.setPlaceholders(p, papi_format)));
+            return false;
+        }
     }
 
 }
