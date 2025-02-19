@@ -25,12 +25,12 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ItemUpgrade {
 
     public static void getInventory(Player p, ItemStack upgradeItem) {
-        Inventory inv = Bukkit.createInventory(p, Files.getItemUpgrade().getInt("gui_upgrade.size") * 9,
-                Chat.colorize(Files.getItemUpgrade().getString("gui_upgrade.title")));
+        Inventory inv = Bukkit.createInventory(p, Files.getItemUpgrade().getInt("gui_upgrade.size") * 9, Chat.colorize(Files.getItemUpgrade().getString("gui_upgrade.title")));
         FileConfiguration config = Files.getItemUpgrade();
         String gui_path = "gui_upgrade.items";
         for (String item_id : Objects.requireNonNull(config.getConfigurationSection(gui_path)).getKeys(false)) {
@@ -66,6 +66,34 @@ public class ItemUpgrade {
                         }
                         String result_id = final_id + "_" + (level + 1);
                         ItemStack itemStack = MMOItems.plugin.getItem(type, result_id);
+                        int slot = config.getInt(gui_path + ".upgraded_item.slot");
+                        if (itemStack != null) {
+                            inv.setItem(slot, itemStack);
+                        } else {
+                            inv.setItem(slot, getItem(gui_path + ".upgraded_item.max_items"));
+                        }
+                    }
+                }
+            } else if (item_id.equalsIgnoreCase("confirm")) {
+                NBTItem nbtItem = NBTItem.get(upgradeItem);
+                if (nbtItem.hasType()) {
+                    String type = nbtItem.getType();
+                    String item_id_check = nbtItem.getString("MMOITEMS_ITEM_ID");
+                    String final_id;
+                    int level = 0;
+                    int index = item_id_check.lastIndexOf('_');
+                    if (index != -1 && index < item_id_check.length() - 1) {
+                        final_id = item_id_check.substring(0, index);
+                        level = Number.getInteger(item_id_check.substring(index + 1));
+                    } else {
+                        final_id = item_id_check;
+                    }
+                    if (config.contains("item_upgrade." + type + ";" + final_id)) {
+                        String cost_papi = config.getString("item_upgrade." + type + ";" + final_id + ".cost.placeholder");
+                        int price = config.getInt("item_upgrade." + type + ";" + final_id + ".cost.price");
+                        String papi = PlaceholderAPI.setPlaceholders(p, Objects.requireNonNull(cost_papi).replace("<money>", String.valueOf(price)).replace("<level>", String.valueOf(level)));
+                        int cost = (int) Double.parseDouble(Calculator.calculator(papi, 0));
+                        ItemStack itemStack = getItemPapi(gui_path + "." + item_id, cost);
                         int slot = config.getInt(gui_path + ".upgraded_item.slot");
                         if (itemStack != null) {
                             inv.setItem(slot, itemStack);
@@ -122,8 +150,7 @@ public class ItemUpgrade {
                         int amount = Integer.parseInt(reqSplit[2]);
                         if (itemStack != null) {
                             if (itemStack.getType() != Material.AIR) {
-                                if (itemStack.getType().toString().equals(itemType)
-                                        && !itemStack.hasItemMeta()) {
+                                if (itemStack.getType().toString().equals(itemType) && !itemStack.hasItemMeta()) {
                                     if (getPlayerAmount(p, itemStack) >= amount) {
                                         amountCheck++;
                                         checkedItems.add(s);
@@ -172,8 +199,7 @@ public class ItemUpgrade {
                         int amount = Integer.parseInt(reqSplit[2]);
                         if (itemStack != null) {
                             if (itemStack.getType() != Material.AIR) {
-                                if (itemStack.getType().toString().equals(itemType)
-                                        && !itemStack.hasItemMeta()) {
+                                if (itemStack.getType().toString().equals(itemType) && !itemStack.hasItemMeta()) {
                                     if (getPlayerAmount(p, itemStack) >= amount) {
                                         removeItems(p, itemStack, amount);
                                         amountCheck++;
@@ -191,10 +217,8 @@ public class ItemUpgrade {
     public static @NotNull List<ItemStack> getReqItems(String type, String final_id, int level) {
         List<ItemStack> reqList = new ArrayList<>();
         FileConfiguration config = Files.getItemUpgrade();
-        if (Objects.requireNonNull(config.getConfigurationSection("item_upgrade." + type + ";" + final_id + ".item_requirements"))
-                .getKeys(false).size() >= level) {
-            List<String> ingredients =
-                    config.getStringList("item_upgrade." + type + ";" + final_id + ".item_requirements.ingredients_" + level);
+        if (Objects.requireNonNull(config.getConfigurationSection("item_upgrade." + type + ";" + final_id + ".item_requirements")).getKeys(false).size() >= level) {
+            List<String> ingredients = config.getStringList("item_upgrade." + type + ";" + final_id + ".item_requirements.ingredients_" + level);
             int amount_check = 0;
             for (String s : ingredients) {
                 String[] reqSplit = s.split(";");
@@ -205,8 +229,7 @@ public class ItemUpgrade {
                     int amount = Integer.parseInt(reqSplit[3]);
                     ItemStack itemStack = MMOItems.plugin.getItem(itemType, itemID);
                     if (itemStack != null) {
-                        if (amount_check <= 640
-                                && (amount_check + amount) <= 640) {
+                        if (amount_check <= 640 && (amount_check + amount) <= 640) {
                             while (amount > 0) {
                                 ItemStack stack = itemStack.clone();
                                 stack.setAmount(Math.min(amount, stack.getMaxStackSize()));
@@ -257,6 +280,41 @@ public class ItemUpgrade {
         return null;
     }
 
+    public static @Nullable ItemStack getItemPapi(String item_path, int cost) {
+        FileConfiguration config = Files.getItemUpgrade();
+        String materialID = config.getString(item_path + ".material");
+        if (materialID != null) {
+            Material material = Material.getMaterial(materialID);
+            if (material != null) {
+                ItemStack itemStack = new ItemStack(material);
+                ItemMeta meta = itemStack.getItemMeta();
+                if (config.contains(item_path + ".enchants")) {
+                    for (String enchantID : config.getStringList(item_path + ".enchants")) {
+                        String[] enchantmentsID = enchantID.split(";");
+                        Enchantment enchantment = Enchantment.getByName(enchantmentsID[0]);
+                        if (enchantment != null) {
+                            meta.addEnchant(enchantment, Number.getInteger(enchantmentsID[1]), true);
+                        }
+                    }
+                }
+                if (config.contains(item_path + ".flags")) {
+                    for (String flagID : config.getStringList(item_path + ".flags")) {
+                        meta.addItemFlags(ItemFlag.valueOf(flagID));
+                    }
+                }
+                if (config.contains(item_path + ".display")) {
+                    meta.setDisplayName(Chat.normalColorize(config.getString(item_path + ".display")));
+                }
+                if (config.contains(item_path + ".lore")) {
+                    meta.setLore(Chat.normalColorize(config.getStringList(item_path + ".lore").stream().map(string -> string.replace("<cost>", String.valueOf(cost))).collect(Collectors.toSet()).stream().toList()));
+                }
+                itemStack.setItemMeta(meta);
+                return itemStack;
+            }
+        }
+        return null;
+    }
+
     public static int getPlayerAmount(@NotNull HumanEntity player, ItemStack item) {
         final PlayerInventory inv = player.getInventory();
         final ItemStack[] items = inv.getContents();
@@ -296,16 +354,13 @@ public class ItemUpgrade {
     }
 
     public static boolean cost(Player p, @NotNull String cost_papi, String papi_parse, String papi_format, int level, int cost_money) {
-        String papi = PlaceholderAPI.setPlaceholders(p, cost_papi.replace("<money>", String.valueOf(cost_money))
-                .replace("<level>", String.valueOf(level)));
+        String papi = PlaceholderAPI.setPlaceholders(p, cost_papi.replace("<money>", String.valueOf(cost_money)).replace("<level>", String.valueOf(level)));
         int cost = (int) Double.parseDouble(Calculator.calculator(papi, 0));
         if (cost <= Double.parseDouble(PlaceholderAPI.setPlaceholders(p, papi_parse))) {
             return true;
         } else {
             DecimalFormat currencyFormat = new DecimalFormat("###,###.##");
-            Chat.sendMessage(p, Objects.requireNonNull(Files.getMessage().getString("user.upgrade_item.not_enough_cost"))
-                    .replace("<cost>", currencyFormat.format(cost))
-                    .replace("<current>", PlaceholderAPI.setPlaceholders(p, papi_format)));
+            Chat.sendMessage(p, Objects.requireNonNull(Files.getMessage().getString("user.upgrade_item.not_enough_cost")).replace("<cost>", currencyFormat.format(cost)).replace("<current>", PlaceholderAPI.setPlaceholders(p, papi_format)));
             return false;
         }
     }
